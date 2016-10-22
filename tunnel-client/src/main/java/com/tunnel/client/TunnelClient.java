@@ -7,10 +7,13 @@ import java.net.ServerSocket;
 import java.net.Socket;
 
 public class TunnelClient {
+	private static String tunnelHostAddr = "101.200.87.104";
+	private static int tunnelHostPort = 8020;
+	
 	private final static int TIME_OUT = 10000;
 	public static void main(String[] args) throws Exception {
         //汇报tunnel
-		final Socket login = new Socket("localhost", 8020);
+		final Socket login = new Socket(tunnelHostAddr, tunnelHostPort);
 		OutputStream loginOut = null;
 		try {
 			login.setSoTimeout(TIME_OUT);
