@@ -20,22 +20,22 @@ public class TunnelClientHandler extends Thread {
     public void run() {
     	InputStream clientIn = null;
     	OutputStream clientOut = null;
+    	byte[] data = new byte[0];
     	try {
     		clientIn = client.getInputStream();
     		clientOut = client.getOutputStream();
-    		StringBuilder request = new StringBuilder();
         	String endFlag = HttpUtil.getFlag();
     		try {
     			byte[] dataBuf = new byte[1024];
     			int len = 0;
     			while((len = clientIn.read(dataBuf,0,dataBuf.length)) != -1){
-    				for(int i=0;i<len;i++){
-    					request.append((char)dataBuf[i]);
-    				}
+    				byte[] dataTmp = new byte[data.length+len];
+
+    				System.arraycopy(data, 0, dataTmp, 0, data.length);
+    				System.arraycopy(dataBuf, 0, dataTmp, data.length, len);
+    				data = dataTmp;
     				
     				//判断结尾
-    				byte[] data = new byte[len];
-    				System.arraycopy(dataBuf, 0, data, 0, len);
     				String flagPic = HttpUtil.filterEnd(data);
     				if(endFlag.endsWith(flagPic)){
     					break;
@@ -44,6 +44,8 @@ public class TunnelClientHandler extends Thread {
     		} catch (IOException e) {
     			e.printStackTrace();
     		}
+    		
+    		String request = new String(data,"UTF-8");
     		String content = request.substring(0, request.length()-endFlag.length());
             
     		
@@ -53,7 +55,7 @@ public class TunnelClientHandler extends Thread {
             	content = content.replaceFirst("Host: localhost:8010", "Host: "+host+":"+port);
             }
             content = content.replaceFirst("Connection: keep-alive", "Connection: Close");
-            
+            System.out.println(content);
             response(content.getBytes(),clientOut);
 		} catch (Exception e) {
 			e.printStackTrace();
