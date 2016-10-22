@@ -4,14 +4,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
-import java.net.SocketAddress;
 
 public class HttpRequestServerHandler extends Thread {
+	public static Boolean lock = true;
 
 	protected Socket client;
 	public String method = "";
 	public String tunnel = "";
-	private final static int TIME_OUT = 10000;
 
 	public HttpRequestServerHandler(Socket _client) {
 		this.client = _client;
@@ -19,7 +18,6 @@ public class HttpRequestServerHandler extends Thread {
 	}
 	
 	public void run(){
-		Socket tunnelSocket = new Socket();
 		InputStream clientIn = null;
 		OutputStream clientOut = null;
 		try {
@@ -28,40 +26,39 @@ public class HttpRequestServerHandler extends Thread {
 			if(data == null || data.length == 0)
 				return;
 			
-			//转发请求给终端Tunnel-client
-			SocketAddress address = Tunnel.getTunnel(tunnel);
-			if(address == null)
-				return;
-			tunnelSocket.setSoTimeout(TIME_OUT);
-			tunnelSocket.connect(address);
-			
-			OutputStream tunnelOut = tunnelSocket.getOutputStream();
-			tunnelOut.write(data, 0, data.length);
-			HttpUtil.endSend(tunnelOut);
-			tunnelOut.flush();
-			
-			InputStream tunnelIn = tunnelSocket.getInputStream();
-			byte[] dataBuf = new byte[1024];
-			int len = 0;
-			clientOut = client.getOutputStream();
-        	String endFlag = HttpUtil.getFlag();
-			while((len = tunnelIn.read(dataBuf,0,dataBuf.length)) != -1){
-				//判断结尾
-				byte[] tunnelData = new byte[len];
-				System.arraycopy(dataBuf, 0, tunnelData, 0, len);
-				String flagPic = HttpUtil.filterEnd(tunnelData);
-				if(endFlag.endsWith(flagPic)){
-					if(len-flagPic.length() > 0){
-						clientOut.write(dataBuf, 0, len-flagPic.length());
+			synchronized (lock) {
+				//转发请求给终端Tunnel-client
+				Socket tunnelSocket = Tunnel.getTunnel(tunnel);
+				if(tunnelSocket == null)
+					return;
+				
+				OutputStream tunnelOut = tunnelSocket.getOutputStream();
+				tunnelOut.write(data, 0, data.length);
+				HttpUtil.endSend(tunnelOut);
+				tunnelOut.flush();
+				
+				InputStream tunnelIn = tunnelSocket.getInputStream();
+				byte[] dataBuf = new byte[1024];
+				int len = 0;
+				clientOut = client.getOutputStream();
+	        	String endFlag = HttpUtil.getFlag();
+				while((len = tunnelIn.read(dataBuf,0,dataBuf.length)) != -1){
+					//判断结尾
+					byte[] tunnelData = new byte[len];
+					
+					System.arraycopy(dataBuf, 0, tunnelData, 0, len);
+					String flagPic = HttpUtil.filterEnd(tunnelData);
+					if(endFlag.endsWith(flagPic)){
+						if(len-flagPic.length() > 0){
+							clientOut.write(dataBuf, 0, len-flagPic.length());
+						}
+						break;
+					}else{
+						clientOut.write(dataBuf, 0, len);
 					}
-					break;
-				}else{
-					clientOut.write(dataBuf, 0, len);
 				}
 			}
 			
-			tunnelIn.close();
-			tunnelOut.close();
 		} catch (IOException e) {
 			e.printStackTrace();
 		} finally {
@@ -72,7 +69,6 @@ public class HttpRequestServerHandler extends Thread {
 				if(clientOut != null){
 					clientOut.close();
 				}
-				tunnelSocket.close();
 				client.close();
 			}catch(Exception ex){}
 		}
@@ -110,7 +106,6 @@ public class HttpRequestServerHandler extends Thread {
 					}
 				}
 				
-				HttpUtil.logData(data);
 				if(this.method.equalsIgnoreCase("POST") || this.method.equals("PUT")){
 					try {
 						//TODO:就这么read，不够吧。

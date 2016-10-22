@@ -1,6 +1,6 @@
 package com.tunnel.server;
 
-import java.net.SocketAddress;
+import java.net.Socket;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -10,16 +10,16 @@ import org.slf4j.LoggerFactory;
 public class Tunnel {
 	private static Logger LOGGER = LoggerFactory.getLogger(Tunnel.class);
 
-	private static Map<String,SocketAddress> TUNNEL_MAP = new HashMap<>();
+	private static Map<String,Socket> TUNNEL_MAP = new HashMap<>();
 	
 	
 	
-	public static synchronized void addTunnel(String tunnel,SocketAddress address){
-		TUNNEL_MAP.put(tunnel, address);
+	public static synchronized void addTunnel(String tunnel,Socket socket){
+		TUNNEL_MAP.put(tunnel, socket);
 		LOGGER.info(tunnel+" connected");
 	}
 	
-	public static synchronized SocketAddress getTunnel(String tunnel){
+	public static synchronized Socket getTunnel(String tunnel){
 		return TUNNEL_MAP.get(tunnel);
 	}
 }
