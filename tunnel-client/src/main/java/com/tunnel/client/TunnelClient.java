@@ -12,33 +12,48 @@ public class TunnelClient {
 	private static int tunnelHostPort = 8020;
 	
 	public static void main(String[] args) throws Exception {
-        //汇报tunnel
-		final Socket login = new Socket(tunnelHostAddr, tunnelHostPort);
-		OutputStream loginOut = null;
-		try {
-			loginOut = login.getOutputStream();
-			//TODO:tunnel
-			byte[] data = "gaspipe".getBytes();
-			loginOut.write(data,0,data.length);
-			loginOut.flush();
-			
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		
-		Thread tunnelClient =new Thread(new Runnable(){
-			public void run(){ 
-				try{
-					String info = "HTTP-TUNNEL SERVER START: ";
-					info += "IP= "+InetAddress.getLocalHost();
-					info += "\tPORT= "+login.getLocalPort();
-					System.out.println(info);
-//					while(true)
-						new TunnelClientHandler(login);
-				}catch(Exception ex){ }
+		if(args == null || args.length < 3){
+			System.out.println("参数不对：[tunnel host port]");
+		}else{
+			final String tunnelName = args[0];
+			final String host = args[1];
+			try {
+				final int port = Integer.parseInt(args[2]);
+				
+				
+				
+				//汇报tunnel
+				final Socket tunnel = new Socket(tunnelHostAddr, tunnelHostPort);
+				OutputStream loginOut = null;
+				try {
+					loginOut = tunnel.getOutputStream();
+					//TODO:tunnel
+					byte[] data = tunnelName.getBytes();
+					loginOut.write(data,0,data.length);
+					loginOut.flush();
+					
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+				
+				Thread tunnelClient =new Thread(new Runnable(){
+					public void run(){ 
+						try{
+							String info = "HTTP-TUNNEL SERVER START: ";
+							info += "IP= "+InetAddress.getLocalHost();
+							info += "\tPORT= "+tunnel.getLocalPort();
+							System.out.println(info);
+//							while(true)
+								new TunnelClientHandler(tunnel,tunnelName,host,port);
+						}catch(Exception ex){ }
+					}
+				});
+				tunnelClient.start();
+			} catch (Exception e) {
+				e.printStackTrace();
 			}
-		});
-		tunnelClient.start();
+		}
+        
     }
 	
 	

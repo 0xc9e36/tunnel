@@ -7,13 +7,16 @@ import java.net.Socket;
 
 public class TunnelClientHandler extends Thread {
 	protected Socket client;
-	private String tunnel = "gaspipe";
-	private String host = "localhost";
-	private int port = 8082;
+	private String tunnel;
+	private String host;
+	private int port;
 	private final static int TIME_OUT = 10000;
 
-	public TunnelClientHandler(Socket _client) {
+	public TunnelClientHandler(Socket _client,String tunnel,String host,int port) {
 		this.client = _client;
+		this.tunnel = tunnel;
+		this.host = host;
+		this.port = port;
 		start();
 	}
 	
