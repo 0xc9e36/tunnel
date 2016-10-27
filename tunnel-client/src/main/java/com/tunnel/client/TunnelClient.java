@@ -7,8 +7,8 @@ import java.net.ServerSocket;
 import java.net.Socket;
 
 public class TunnelClient {
-	private static String tunnelHostAddr = "101.200.87.104";
-//	private static String tunnelHostAddr = "localhost";
+//	private static String tunnelHostAddr = "101.200.87.104";
+	private static String tunnelHostAddr = "localhost";
 	private static int tunnelHostPort = 8020;
 	
 	public static void main(String[] args) throws Exception {

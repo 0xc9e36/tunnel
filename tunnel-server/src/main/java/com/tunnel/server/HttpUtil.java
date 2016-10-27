@@ -1,6 +1,7 @@
 package com.tunnel.server;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 
 public class HttpUtil {
@@ -92,6 +93,24 @@ public class HttpUtil {
 		}
 		
 		return data;
+	}
+	
+	public static byte[] readData(InputStream in){
+		try {
+			if(in.available() > 0){
+				byte[] data = new byte[1024];
+				int len = in.read(data, 0, data.length);
+				while(in.available() > 0){
+					byte[] newData = new byte[data.length+1024];
+					System.arraycopy(data, 0, newData, 0, data.length);
+					
+				}
+				return data;
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return null;
 	}
 	
 	public static void main(String[] args) {

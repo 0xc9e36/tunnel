@@ -110,11 +110,12 @@ public class HttpRequestServerHandler extends Thread {
 					try {
 						//TODO:就这么read，不够吧。
 						if(clientIn.available() > 0){
-							byte[] payload =new byte[1024];
-							int n = clientIn.read(payload);
-							byte[] dataWidthPayload = new byte[data.length+n];
+							
+							byte[] payload = HttpUtil.readData(clientIn);
+							
+							byte[] dataWidthPayload = new byte[data.length+payload.length];
 							System.arraycopy(data, 0, dataWidthPayload, 0, data.length);
-							System.arraycopy(payload, 0, dataWidthPayload, data.length, n);
+							System.arraycopy(payload, 0, dataWidthPayload, data.length, payload.length);
 							data = dataWidthPayload;
 						}
 					} catch (Exception e) {

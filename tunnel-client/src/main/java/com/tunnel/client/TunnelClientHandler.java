@@ -57,7 +57,8 @@ public class TunnelClientHandler extends Thread {
                 	content = content.replaceFirst("Host: localhost:8010", "Host: "+host+":"+port);
                 }
                 content = content.replaceFirst("Connection: keep-alive", "Connection: Close");
-                response(content.getBytes(),clientOut);
+                System.out.println(content);
+                response(content.getBytes("UTF-8"),clientOut);
     		}
 		} catch (Exception e) {
 			e.printStackTrace();
