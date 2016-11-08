@@ -13,7 +13,7 @@ public class TunnelClient {
 	
 	public static void main(String[] args) throws Exception {
 		if(args == null || args.length < 3){
-			System.out.println("å‚æ•°ä¸å¯¹ï¼š[tunnel host port]");
+			System.out.println("²ÎÊýÒì³£[tunnel host port]");
 		}else{
 			final String tunnelName = args[0];
 			final String host = args[1];
@@ -22,12 +22,10 @@ public class TunnelClient {
 				
 				
 				
-				//æ±‡æŠ¥tunnel
 				final Socket tunnel = new Socket(tunnelHostAddr, tunnelHostPort);
 				OutputStream loginOut = null;
 				try {
 					loginOut = tunnel.getOutputStream();
-					//TODO:tunnel
 					byte[] data = tunnelName.getBytes();
 					loginOut.write(data,0,data.length);
 					loginOut.flush();

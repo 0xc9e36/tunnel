@@ -1,6 +1,7 @@
 package com.tunnel.client;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 
 public class HttpUtil {
@@ -94,7 +95,7 @@ public class HttpUtil {
 		return data;
 	}
 	
-public static byte[] replaceLast(byte[] data,String reg,String str){
+	public static byte[] replaceLast(byte[] data,String reg,String str){
 		
 		StringBuilder find = new StringBuilder();
 		int start=-1,end=-1;
@@ -132,6 +133,39 @@ public static byte[] replaceLast(byte[] data,String reg,String str){
 		}
 		
 		return data;
+	}
+	
+	
+	public static byte[] readData(InputStream in){
+		try {
+			if(in.available() > 0){
+				byte[] result = new byte[0];
+				int index = 0;
+				byte[] data = new byte[1024];
+				int len = 0;
+				while((len=in.read(data, 0, data.length)) > 0){
+					if(index+len > result.length){
+						byte[] newResult = new byte[result.length+1024];
+						System.arraycopy(result, 0, newResult, 0, result.length);
+						result = newResult;
+						
+					}
+					System.arraycopy(data, 0, result, index, len);
+					index = index+len;
+				}
+				
+				if(index <= result.length){
+					//È¥Î²²¿¿Õ
+					byte[] newResult = new byte[index];
+					System.arraycopy(result, 0, newResult, 0, index);
+					result = newResult;
+				}
+				return result;
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return null;
 	}
 	
 	public static void main(String[] args) {

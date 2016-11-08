@@ -47,6 +47,7 @@ public class HttpRequestServerHandler extends Thread {
 					byte[] tunnelData = new byte[len];
 					
 					System.arraycopy(dataBuf, 0, tunnelData, 0, len);
+					HttpUtil.logData(tunnelData);
 					String flagPic = HttpUtil.filterEnd(tunnelData);
 					if(endFlag.endsWith(flagPic)){
 						if(len-flagPic.length() > 0){
@@ -105,7 +106,7 @@ public class HttpRequestServerHandler extends Thread {
 						}
 					}
 				}
-				
+				HttpUtil.logData(data);
 				if(this.method.equalsIgnoreCase("POST") || this.method.equals("PUT")){
 					try {
 						//TODO:就这么read，不够吧。

@@ -37,17 +37,26 @@ public class TunnelClientHandler extends Thread {
         				System.arraycopy(dataBuf, 0, dataTmp, data.length, len);
         				data = dataTmp;
         				
-        				//判断结尾
-        				String flagPic = HttpUtil.filterEnd(data);
+        				String flagPic = HttpUtil.filterEnd(dataTmp);
         				if(endFlag.endsWith(flagPic)){
+        					data = new byte[dataTmp.length-endFlag.getBytes().length];
+        					System.arraycopy(dataTmp, 0, data, 0, data.length);
         					break;
+        				}else{
+            				data = dataTmp;
         				}
         			}
         		} catch (IOException e) {
         			e.printStackTrace();
         		}
         		
-        		String request = new String(data,"UTF-8");
+
+        		data = HttpUtil.replaceFirst(data, tunnel+"/", "");
+        		//TODO:需要换成线上
+        		data = HttpUtil.replaceFirst(data, "Host: localhost:8010", "Host: "+host+":"+port);
+        		data = HttpUtil.replaceFirst(data,"Connection: keep-alive", "Connection: Close");
+        		
+        		/*String request = new String(data,"UTF-8");
         		String content = request.substring(0, request.length()-endFlag.length());
                 
         		
@@ -57,8 +66,11 @@ public class TunnelClientHandler extends Thread {
                 	content = content.replaceFirst("Host: localhost:8010", "Host: "+host+":"+port);
                 }
                 content = content.replaceFirst("Connection: keep-alive", "Connection: Close");
-                System.out.println(content);
-                response(content.getBytes("UTF-8"),clientOut);
+                System.out.println(content);*/
+        		HttpUtil.logData(data);
+        		if(data.length > 0){
+        			response(data,clientOut);
+        		}
     		}
 		} catch (Exception e) {
 			e.printStackTrace();
