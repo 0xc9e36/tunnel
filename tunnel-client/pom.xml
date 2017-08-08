@@ -10,6 +10,12 @@
     <packaging>jar</packaging>
 
     <dependencies>
+		<dependency>
+		    <groupId>com.tunnel.common</groupId>
+		    <artifactId>tunnel-common</artifactId>
+		    <version>0.1</version>
+		</dependency>
+		
     	<!-- ######################### 日志 ################################# -->
         <!-- slf4j -->
         <dependency>
