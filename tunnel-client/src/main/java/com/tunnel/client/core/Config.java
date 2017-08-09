@@ -20,7 +20,6 @@ public class Config {
 
 	public static String NAME;
 	public static String HOST_ARY;
-	
 	public static Map<String,IpAndPort> HOST_MAP = new HashMap<>();
 	static {
 		Properties props = PropsUtil.loadProps("sys.properties");

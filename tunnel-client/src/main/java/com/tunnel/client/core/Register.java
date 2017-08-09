@@ -1,5 +1,6 @@
 package com.tunnel.client.core;
 
+import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.nio.channels.SocketChannel;
@@ -13,14 +14,17 @@ public class Register {
     private static final Logger LOGGER = LoggerFactory.getLogger(Register.class);
     
 	public SocketChannel excute(){
-		SocketChannel socketChannel = null;  
-        try {  
-            socketChannel = SocketChannel.open();  
+		SocketChannel socketChannel = null;
+        try {
+        	String localHost = "...";
+    		try {
+    			localHost = InetAddress.getLocalHost().getHostAddress();
+			} catch (Exception e) {}
+    		String content = Config.NAME+"["+localHost+"]"+"#_NAME-#"+Config.HOST_ARY;
+    		socketChannel = SocketChannel.open();  
             SocketAddress socketAddress = new InetSocketAddress(Config.SERVER_IP, Config.REGISTER_PORT);  
             socketChannel.connect(socketAddress);  
             
-            
-            String content = Config.NAME+"#_NAME-#"+Config.HOST_ARY;
             TunnelUtil.sendData(socketChannel, content.getBytes());  
             TunnelUtil.sendEnd(socketChannel);
         } catch (Exception ex) {  

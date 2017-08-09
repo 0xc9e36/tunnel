@@ -10,6 +10,13 @@
     <packaging>jar</packaging>
 
     <dependencies>
+    	<!-- https://mvnrepository.com/artifact/io.netty/netty -->
+		<dependency>
+		    <groupId>io.netty</groupId>
+		    <artifactId>netty</artifactId>
+		    <version>3.10.6.Final</version>
+		</dependency>
+		
 		<dependency>
 		    <groupId>com.tunnel.common</groupId>
 		    <artifactId>tunnel-common</artifactId>

@@ -23,6 +23,10 @@ import com.tunnel.server.core.PackManager;
 public class PickupThread extends Thread{
     private static final Logger LOGGER = LoggerFactory.getLogger(PickupThread.class);
 
+    public PickupThread() {
+		this.setName("PickupThread");
+	}
+    
 	@Override
 	public void run() {
 		Selector selector = null;  
@@ -44,8 +48,8 @@ public class PickupThread extends Thread{
             // step tells the selector that the socket wants to be put on the  
             // ready list when accept operations occur, so allowing multiplexed  
             // non-blocking I/O to take place.  
-            serverSocketChannel.register(selector, SelectionKey.OP_ACCEPT);  
-      
+ serverSocketChannel.register(selector,SelectionKey.OP_ACCEPT);  
+            
             // Here's where everything happens. The select method will  
             // return when any operations registered above have occurred, the  
             // thread has been interrupted, etc.  
@@ -55,15 +59,17 @@ public class PickupThread extends Thread{
       
                 // Walk through the ready keys collection and process date requests.  
                 while (it.hasNext()) {  
-                    SelectionKey readyKey = it.next();  
-                    it.remove();  
+                    SelectionKey readyKey = it.next();
+                    it.remove();
                       
                     // The key indexes into the selector so you  
                     // can retrieve the socket that's ready for I/O
-                    ServerSocketChannel ssc = (ServerSocketChannel) readyKey.channel();
-                    if(ssc != null){
-                    	SocketChannel socketChannel = ssc.accept();
-                    	PackManager.pickup(socketChannel);
+                    if(readyKey.isAcceptable()){
+                    	ServerSocketChannel ssc = (ServerSocketChannel) readyKey.channel();
+                    	if(ssc != null){
+                    		SocketChannel socketChannel = ssc.accept();
+                    		PackManager.pickup(socketChannel);
+                    	}
                     }
                 }
             }

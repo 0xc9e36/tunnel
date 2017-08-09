@@ -20,6 +20,7 @@ public class SwitchThread extends Thread{
 	
 	public SwitchThread(SocketChannel socketChannel) {
 		this.socketChannel = socketChannel;
+		this.setName("SwitchThread");
 	}
 
 	@Override
@@ -48,6 +49,7 @@ public class SwitchThread extends Thread{
 				
 			} catch (IOException e) {
 				e.printStackTrace();
+				System.out.println("client is shutdown");
 				System.exit(0);
 			}
 		}

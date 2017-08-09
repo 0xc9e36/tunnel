@@ -16,6 +16,7 @@ public class AskThread extends Thread{
 
 	public AskThread(byte[] data) {
 		this.data = data;
+		this.setName("AskThread");
 	}
 	
 	@Override
@@ -28,11 +29,15 @@ public class AskThread extends Thread{
 			
 			//1.按照包裹id，去服务端取件
 			byte[] pack = worker.pickup(split[0]);
-			System.out.println(new String(pack));
+//			System.out.println("=======pack======");
+//			System.out.println(new String(pack));
 			//2.将包裹送达到终端并处理
 			HttpData reply = worker.send(split[1], pack);
 			//3.将出来结果发送给服务端
 			if(reply != null){
+//				System.out.println("=======reply header======");
+//				System.out.println(new String(reply.getHeader()));
+				
 				worker.reply(split[0], reply);
 			}else{
 				worker.reply(split[0], "404 resource not found (from host)".getBytes());

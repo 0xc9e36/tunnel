@@ -4,7 +4,6 @@ import java.nio.channels.SocketChannel;
 
 import com.tunnel.common.HttpData;
 import com.tunnel.common.HttpUtil;
-import com.tunnel.common.StringUtil;
 import com.tunnel.common.TunnelUtil;
 import com.tunnel.server.core.PackManager;
 import com.tunnel.server.core.TunnelManager;
@@ -19,6 +18,7 @@ public class HttpProcessThread extends Thread{
 	
 	public HttpProcessThread(SocketChannel socketChannel) {
 		this.socketChannel = socketChannel;
+		this.setName("HttpProcessThread");
 	}
 
 	@Override
@@ -41,13 +41,13 @@ public class HttpProcessThread extends Thread{
 					TunnelUtil.sendData(socketChannel, ("404 resource not found ("+host+" client not fount)").getBytes());
 					break;
 				}
-				//等待客户端处理数据包，总共10秒钟
+				//等待客户端处理数据包，总共20秒钟
 				byte[] reply = null;
 				for(int i=0;i<100;i++){
 					try {
+						Thread.sleep(200);
 						reply = PackManager.getReply(packId);
 						if(reply != null) break;
-						Thread.sleep(100);
 					} catch (Exception e) {}
 				}
 				if(reply == null){
@@ -65,12 +65,6 @@ public class HttpProcessThread extends Thread{
 			try {
 				socketChannel.close();
 			} catch (Exception e2) {}
-			try {
-				//清空数据包
-				if(StringUtil.isNotEmpty(packId)){
-					PackManager.remove(packId);
-				}
-			} catch (Exception e2){}
 		}
 	}
 }

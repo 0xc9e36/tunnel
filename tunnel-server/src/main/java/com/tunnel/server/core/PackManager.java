@@ -28,14 +28,16 @@ public class PackManager {
 	
 	public synchronized static void pickup(SocketChannel socketChannel) throws IOException{
 		List<byte[]> receiveData = TunnelUtil.receiveData(socketChannel);
-		Pack pack = null;
+		String packId = null;
 		for(byte[] data:receiveData){
-			String packId = new String(data);
+			packId = new String(data);
 			if(StringUtil.isNotEmpty(packId)){
-				pack = PACK_MAP.get(packId);
 				break;
 			}
 		}
+		
+		Pack pack = PACK_MAP.get(packId);
+		
 		if(pack != null){
 			//头信息
 			TunnelUtil.sendData(socketChannel, pack.getRequest().getHeader());
@@ -50,7 +52,7 @@ public class PackManager {
 		} catch (Exception e) {}
 	}
 	
-	public static synchronized void setReply(SocketChannel socketChannel) throws IOException{
+	public synchronized static void setReply(SocketChannel socketChannel) throws IOException{
 		List<byte[]> receiveData = TunnelUtil.receiveData(socketChannel);
 		if(CollectionUtil.isNotEmpty(receiveData) && receiveData.size() == 2){
 			//第一个包裹是packId
@@ -71,17 +73,13 @@ public class PackManager {
 		} catch (Exception e) {}
 	}
 	
-	public static synchronized byte[] getReply(String packId){
+	public synchronized static byte[] getReply(String packId){
 		Pack pack = PACK_MAP.get(packId);
 		if(pack != null){
+			PACK_MAP.remove(packId);
 			return pack.getResponse();
 		}
 		return null;
 	}
-	
-	public static synchronized void remove(String packId){
-		PACK_MAP.remove(packId);
-	}
-	
 	
 }
