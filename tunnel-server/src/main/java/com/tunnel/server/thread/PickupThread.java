@@ -48,7 +48,7 @@ public class PickupThread extends Thread{
             // step tells the selector that the socket wants to be put on the  
             // ready list when accept operations occur, so allowing multiplexed  
             // non-blocking I/O to take place.  
- serverSocketChannel.register(selector,SelectionKey.OP_ACCEPT);  
+            serverSocketChannel.register(selector,SelectionKey.OP_ACCEPT);  
             
             // Here's where everything happens. The select method will  
             // return when any operations registered above have occurred, the  

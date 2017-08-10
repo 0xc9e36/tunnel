@@ -5,14 +5,17 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 
+import sun.nio.ch.DirectBuffer;
+
 public class HttpUtil {
 
 	public static HttpData readData(SocketChannel socketChannel) throws IOException{
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();  
 		HttpData httpData = null;
+		ByteBuffer buffer = null;
 		try { 
         	//TODO:1024字节够不够完全描述一次http请求，这里还要具体分析
-            ByteBuffer buffer = ByteBuffer.allocateDirect(1024);  
+			buffer = ByteBuffer.allocateDirect(1024);  
             int len = 0;
             while ((len = socketChannel.read(buffer)) >= 0) {
             	buffer.flip();
@@ -28,6 +31,13 @@ public class HttpUtil {
             try {  
                 baos.close();  
             } catch(Exception ex) {}  
+            
+            try {
+            	if(buffer != null){
+            		//ByteBuffer.allocateDirect(1024); GC是无法释放的，通过此处释放，提升系统性能
+            		((DirectBuffer)buffer).cleaner().clean();
+            	}
+            } catch(Exception ex) {}
         }  
         return httpData;  
     }

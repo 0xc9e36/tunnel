@@ -7,12 +7,17 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.tunnel.common.StringUtil;
+import com.tunnel.common.TunnelUtil;
 import com.tunnel.server.core.Config;
+import com.tunnel.server.core.Tunnel;
 import com.tunnel.server.core.TunnelManager;
 
 /**
@@ -67,8 +72,8 @@ public class RegisterThread extends Thread{
                     if(readyKey.isAcceptable()){
                     	ServerSocketChannel ssc = (ServerSocketChannel) readyKey.channel();
                     	if(ssc != null){
-                    		SocketChannel socketChannel = ssc.accept();  
-                    		TunnelManager.register(socketChannel);
+                    		SocketChannel socketChannel = ssc.accept();
+                    		register(socketChannel);
                     	}
                     }
                 }  
@@ -89,5 +94,52 @@ public class RegisterThread extends Thread{
             	}
             } catch(Exception ex) {}  
         }  
+	}
+	
+	
+	public void register(SocketChannel socketChannel) throws IOException{
+		List<byte[]> receiveData = TunnelUtil.receiveData(socketChannel);
+		for(byte[] data:receiveData){
+			String content = new String(data);
+			if(StringUtil.isNotEmpty(content) || content.contains("#_NAME-#")){
+				String[] split = content.split("#_NAME-#");
+				String clientName = split[0];
+				String hostAry = split[1];
+				String[] split2 = hostAry.split(",");
+				
+				List<String> successHostList = new ArrayList<>();
+				List<String> failedHostList = new ArrayList<>();
+				for(String host:split2){
+					host = host == null?"":host.trim();
+					if(StringUtil.isNotEmpty(host)){
+						Tunnel tunnel = new Tunnel(host, clientName);
+						tunnel.setNotifyChannel(socketChannel);
+						boolean ok = TunnelManager.register(tunnel);
+						if(ok){
+							successHostList.add(host);
+						}else{
+							failedHostList.add(host);
+						}
+					}
+				}
+				String success = "";
+				for(String host:successHostList){
+					if(StringUtil.isNotEmpty(success)){
+						success = success+",";
+					}
+					success = success+host;
+				}
+				String failed = "";
+				for(String host:failedHostList){
+					if(StringUtil.isNotEmpty(failed)){
+						failed = failed+",";
+					}
+					failed = failed+host;
+				}
+				
+				TunnelUtil.sendData(socketChannel, ("#_REGISTER-#"+success+"#_SPLIT-#"+failed).getBytes());
+				TunnelUtil.sendEnd(socketChannel);
+			}
+		}
 	}
 }

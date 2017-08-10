@@ -7,6 +7,8 @@ import java.nio.channels.SocketChannel;
 import java.util.ArrayList;
 import java.util.List;
 
+import sun.nio.ch.DirectBuffer;
+
 public class TunnelUtil {
 	private static final byte[] END_BYTE_ARY = "#_EOF-#".getBytes();
 	
@@ -14,8 +16,9 @@ public class TunnelUtil {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();  
         byte[] data = new byte[0];
         List<byte[]> result = new ArrayList<>();
+        ByteBuffer buffer = null;
         try {  
-            ByteBuffer buffer = ByteBuffer.allocateDirect(1024);  
+        	buffer = ByteBuffer.allocateDirect(1024);  
             int len = 0;  
             while ((len = socketChannel.read(buffer)) >= 0) {  
                 buffer.flip();
@@ -35,8 +38,15 @@ public class TunnelUtil {
         } finally {  
             try {  
                 baos.close();  
-            } catch(Exception ex) {}  
-        }  
+            } catch(Exception ex) {}
+            
+            try {
+            	if(buffer != null){
+            		//ByteBuffer.allocateDirect(1024); GC是无法释放的，通过此处释放，提升系统性能
+            		((DirectBuffer)buffer).cleaner().clean();
+            	}
+            } catch(Exception ex) {}
+        }
         return result;  
     }
 	
