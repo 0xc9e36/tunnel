@@ -27,7 +27,7 @@ public class HttpUtil {
 		// 数据中可能包含多个数据包
 		// 每个数据包都以结束符作为结束
 		byte[] headerEndFlag = "\r\n\r\n".getBytes();
-		HttpData httpData = new HttpData();
+		HttpData httpData = null;
 		for (int i = 0; i < data.length; i++) {
 			if (data[i] == headerEndFlag[0]) {
 				// 从这开始比对
@@ -41,13 +41,14 @@ public class HttpUtil {
 					// 找到完全匹配了，开始拿数据包
 					byte[] header = new byte[i];
 					System.arraycopy(data, 0, header, 0, header.length);
+					httpData = new HttpData();
 					httpData.setHeader(header);
 					break;
 				}
 			}
 		}
 
-		if (httpData.getHeader() != null) {
+		if (httpData != null && httpData.getHeader() != null) {
 			// 根据头信息，分析数据的结构
 			// if T-E: chunked, 就读, 直到流里有\r\n0\r\n\r\n
 			// else if Content-Length存在, 就从头的末尾开始计算C-L个字节.
