@@ -1,4 +1,4 @@
-package com.tunnel.server.core;
+package com.tunnel.server;
 
 import java.util.Properties;
 
@@ -12,7 +12,6 @@ public class Config {
 
     public static int HTTP_SERVER_PORT;
     public static int REGISTER_PORT;
-	public static int PICKUP_PORT;
 	public static int REPLY_PORT;
 	static{
 		Properties props = PropsUtil.loadProps("sys.properties");
@@ -25,12 +24,6 @@ public class Config {
 		REGISTER_PORT = PropsUtil.getInt(props, "register_port");
 		if(REGISTER_PORT <= 0){
 			LOGGER.error("客户端注册[端口]配置错误：register_port="+REGISTER_PORT);
-			System.exit(0);
-		}
-		
-		PICKUP_PORT = PropsUtil.getInt(props, "pickup_port");
-		if (PICKUP_PORT <= 0) {
-			LOGGER.error("取件[端口]配置错误：pick_port=" + PICKUP_PORT);
 			System.exit(0);
 		}
 

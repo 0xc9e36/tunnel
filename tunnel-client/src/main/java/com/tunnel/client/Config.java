@@ -1,7 +1,7 @@
-package com.tunnel.client.core;
+package com.tunnel.client;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
 
 import org.slf4j.Logger;
@@ -15,12 +15,11 @@ public class Config {
 
 	public static String SERVER_IP;
 	public static int REGISTER_PORT;
-	public static int PICKUP_PORT;
 	public static int REPLY_PORT;
 
 	public static String NAME;
 	public static String HOST_ARY;
-	public static Map<String,IpAndPort> HOST_MAP = new HashMap<>();
+	public static List<IpAndPort> HOST_LIST = new ArrayList<>();
 	static {
 		Properties props = PropsUtil.loadProps("sys.properties");
 		SERVER_IP = PropsUtil.getString(props, "server_ip");
@@ -35,12 +34,6 @@ public class Config {
 			System.exit(0);
 		}
 		
-		PICKUP_PORT = PropsUtil.getInt(props, "pickup_port");
-		if (PICKUP_PORT <= 0) {
-			LOGGER.error("取件[端口]配置错误：pick_port=" + PICKUP_PORT);
-			System.exit(0);
-		}
-
 		REPLY_PORT = PropsUtil.getInt(props, "reply_port");
 		if (REPLY_PORT <= 0) {
 			LOGGER.error("汇报[端口]配置错误：reply_port=" + REPLY_PORT);
@@ -77,17 +70,16 @@ public class Config {
 				LOGGER.error("客户端[域名映射]配置错误："+host+"=" + mapper);
 				System.exit(0);
 			}
-			String[] ipAndPort = mapper.split(":");
-			if(ipAndPort.length != 2){
+			String[] ipAndPortConfig = mapper.split(":");
+			if(ipAndPortConfig.length != 2){
 				LOGGER.error("客户端[域名映射]配置错误（提示 ip:端口）："+host+"=" + mapper);
 				System.exit(0);
 			}
 			
 			try {
-				IpAndPort ipAndPort2 = new IpAndPort(ipAndPort[0], Integer.parseInt(ipAndPort[1]));
-				HOST_MAP.put(host, ipAndPort2);
+				IpAndPort ipAndPort = new IpAndPort(ipAndPortConfig[0], Integer.parseInt(ipAndPortConfig[1]));
+				HOST_LIST.add(ipAndPort);
 			} catch (Exception e) {
-				e.printStackTrace();
 				LOGGER.error("客户端[域名映射]配置错误（提示 ip:端口）："+host+"=" + mapper);
 				System.exit(0);
 			}

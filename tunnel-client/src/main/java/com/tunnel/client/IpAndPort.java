@@ -1,4 +1,4 @@
-package com.tunnel.client.core;
+package com.tunnel.client;
 
 public class IpAndPort {
 
