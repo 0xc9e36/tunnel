@@ -28,8 +28,6 @@ tunnel-server的sys.properties配置：
 http_server_port=6660
 #客户端注册使用的端口
 register_port=6661
-#客户端取件端口
-pickup_port=6662
 #客户端汇报结果端口
 reply_port=6663
 
@@ -40,8 +38,6 @@ tunnel-client的sys.properties配置
 server_ip=121.*.*.*
 #客户端注册端口，保持和tunnel-server的配置一致
 register_port=6661
-#客户端取件端口，保持和tunnel-server的配置一致
-pickup_port=6662
 #客户端汇报结果端口，保持和tunnel-server的配置一致
 reply_port=6663
 #客户端的名称，全局唯一
