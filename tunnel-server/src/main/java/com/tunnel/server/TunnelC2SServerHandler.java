@@ -1,20 +1,25 @@
 package com.tunnel.server;
   
+import com.tunnel.common.TunnelBaseHandler;
+
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelFutureListener;
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.SimpleChannelInboundHandler;  
+import io.netty.channel.ChannelHandlerContext;  
   
-public class TunnelC2SServerHandler extends SimpleChannelInboundHandler<ByteBuf>{  
+public class TunnelC2SServerHandler extends TunnelBaseHandler{  
     
-    @Override  
+    public TunnelC2SServerHandler() {
+		super("C2S");
+	}
+
+	@Override  
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {  
     	cause.printStackTrace();  
         ctx.close();
     }
 
 	@Override
-	protected void channelRead0(ChannelHandlerContext ctx, ByteBuf buf) throws Exception {
+	protected void handleData(ChannelHandlerContext ctx, ByteBuf buf) {
 		//前16个字符是
 		//requestid 时间戳+三位随机数，代表http请求的编号 占16位
 		if(buf.readableBytes() > 16){
@@ -33,8 +38,12 @@ public class TunnelC2SServerHandler extends SimpleChannelInboundHandler<ByteBuf>
 		}
 	}
 	
-	@Override
-	public void channelActive(ChannelHandlerContext ctx) throws Exception {
-	}
+
+    @Override
+    protected void handleReaderIdle(ChannelHandlerContext ctx) {
+        super.handleReaderIdle(ctx);
+        ctx.close();
+        System.out.println("关闭C2S连接");
+    }
 	
 }  

@@ -4,12 +4,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
-import io.netty.buffer.Unpooled;
-import io.netty.handler.codec.http.DefaultFullHttpResponse;
-import io.netty.handler.codec.http.FullHttpResponse;
-import io.netty.handler.codec.http.HttpResponseStatus;
-import io.netty.handler.codec.http.HttpVersion;
-
 public class HttpUtil {
 
 	 //有本事不要格式化
@@ -117,39 +111,36 @@ public class HttpUtil {
 		return "";
 	}
 	
-	public static FullHttpResponse response400() {
-		String content = "tunnel:400 Bad Request";
-		byte[] contentBytes = content.getBytes();
-		FullHttpResponse response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_0, HttpResponseStatus.BAD_REQUEST,
-				Unpooled.wrappedBuffer(contentBytes));
-
-		response.headers().set("Content-Type", "text/plain");
-		response.headers().set("Content-Length", contentBytes.length);
-		response.headers().set("Connection", "close");
-		return response;
+	public static byte[] response400(String endPoint) {
+		String content = "400 Bad Request(from "+endPoint+")";
+		String http = "HTTP/1.1 400 Bad Request\r\n"+
+		"Date: Sat, 31 Dec 2005 23:59:59 GMT\r\n"+
+		"Content-Type: text/html;charset=ISO-8859-1\r\n"+
+		"Connection: close\r\n"+
+		"Content-Length: "+content.getBytes().length+"\r\n\r\n"+
+		 content;
+		return http.getBytes();
 	}
 
-	public static FullHttpResponse response404() {
-		String content = "tunnel:404 Not Found";
-		byte[] contentBytes = content.getBytes();
-		FullHttpResponse response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_0, HttpResponseStatus.NOT_FOUND,
-				Unpooled.wrappedBuffer(contentBytes));
-
-		response.headers().set("Content-Type", "text/plain");
-		response.headers().set("Content-Length", contentBytes.length);
-		response.headers().set("Connection", "close");
-		return response;
+	public static byte[] response404(String endPoint) {
+		String content = "404 Not Found(from "+endPoint+")";
+		String http = "HTTP/1.1 404 Not Found Request\r\n"+
+		"Date: Sat, 31 Dec 2005 23:59:59 GMT\r\n"+
+		"Content-Type: text/html;charset=ISO-8859-1\r\n"+
+		"Connection: close\r\n"+
+		"Content-Length: "+content.getBytes().length+"\r\n\r\n"+
+		 content;
+		return http.getBytes();
 	}
 	
-	public static FullHttpResponse response500(String error) {
-		String content = "tunnel:"+error;
-		byte[] contentBytes = content.getBytes();
-		FullHttpResponse response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_0, HttpResponseStatus.INTERNAL_SERVER_ERROR,
-				Unpooled.wrappedBuffer(contentBytes));
-
-		response.headers().set("Content-Type", "text/plain");
-		response.headers().set("Content-Length", contentBytes.length);
-		response.headers().set("Connection", "close");
-		return response;
+	public static byte[] response500(String error,String endPoint) {
+		String content = "500 Internal Server Error(from "+endPoint+"):"+error;
+		String http = "HTTP/1.1 404 500 Internal Server Error\r\n"+
+		"Date: Sat, 31 Dec 2005 23:59:59 GMT\r\n"+
+		"Content-Type: text/html;charset=ISO-8859-1\r\n"+
+		"Connection: close\r\n"+
+		"Content-Length: "+content.getBytes().length+"\r\n\r\n"+
+		 content;
+		return http.getBytes();
 	}
 }

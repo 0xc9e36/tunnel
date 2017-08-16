@@ -6,13 +6,13 @@ import com.tunnel.common.Constant;
 import com.tunnel.common.HttpData;
 import com.tunnel.common.HttpUtil;
 import com.tunnel.common.StringUtil;
+import com.tunnel.common.TunnelBaseHandler;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
-import io.netty.handler.codec.http.FullHttpResponse;
 import io.netty.util.Attribute;
 import io.netty.util.AttributeKey;  
   
@@ -23,11 +23,7 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<ByteBuf>{
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {  
     	cause.printStackTrace();  
-        Attribute<String> attr = ctx.attr(HTTP_REQUESTID_KEY);
-        if(attr.get() != null){
-        	String requestid = attr.get();
-        	HttpChannelManager.remove(requestid);
-        }
+		removeHttp(ctx);
         ctx.close();
     }
 
@@ -77,35 +73,38 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<ByteBuf>{
 					if(attr.get() != null){
 						byte[] hostIndexBytes = String.valueOf(tunnel.getHostIndex()).getBytes();
 						byte[] requestIdBytes = attr.get().getBytes();
-						byte[] endFlagBytes = Constant.ENT_FLAG.getBytes();
-						ByteBuf dispatchBuf = null;  
-			        	dispatchBuf = Unpooled.buffer(hostIndexBytes.length+requestIdBytes.length+data.length+endFlagBytes.length);  
-			        	dispatchBuf.writeBytes(hostIndexBytes);
-			        	dispatchBuf.writeBytes(requestIdBytes);  
-			        	dispatchBuf.writeBytes(data);
-			        	dispatchBuf.writeBytes(endFlagBytes);
-			        	clientCtx.writeAndFlush(dispatchBuf);  
+						ByteBuf dispatchBuf = Unpooled.buffer(hostIndexBytes.length+requestIdBytes.length+data.length+Constant.ENT_FLAG_BYTES.length);  
+						dispatchBuf.writeByte(TunnelBaseHandler.COMMON_MSG);//标识
+						dispatchBuf.writeBytes(hostIndexBytes);//数据
+			        	dispatchBuf.writeBytes(requestIdBytes); //数据 
+			        	dispatchBuf.writeBytes(data);//数据
+			        	dispatchBuf.writeBytes(Constant.ENT_FLAG_BYTES);//结束标识
+			        	clientCtx.writeAndFlush(dispatchBuf);
 					}
 					
 				}else{
-					FullHttpResponse response404 = HttpUtil.response404();
+					byte[] response404 = HttpUtil.response404("tunnel-server");
 					ctx.writeAndFlush(response404).addListener(ChannelFutureListener.CLOSE);
 				}
 			}
 			
 		}else{
-			FullHttpResponse response400 = HttpUtil.response400();
+			byte[] response400 = HttpUtil.response400("tunnel-server");
 			ctx.writeAndFlush(response400).addListener(ChannelFutureListener.CLOSE);
 		}
 	}
 	
 	@Override
 	public void channelInactive(ChannelHandlerContext ctx) throws Exception {
+		removeHttp(ctx);
+		super.channelInactive(ctx);
+	}
+	
+	private void removeHttp(ChannelHandlerContext ctx){
 		Attribute<String> attr = ctx.attr(HTTP_REQUESTID_KEY);
         if(attr.get() != null){
         	String requestid = attr.get();
         	HttpChannelManager.remove(requestid);
         }
-		super.channelInactive(ctx);
 	}
 }  

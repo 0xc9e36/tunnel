@@ -8,8 +8,7 @@ import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
-import io.netty.handler.codec.http.HttpObjectAggregator;
-import io.netty.handler.codec.http.HttpResponseEncoder;  
+import io.netty.handler.codec.http.HttpObjectAggregator;  
   
 public class HttpServer extends Thread{  
   
@@ -33,8 +32,8 @@ public class HttpServer extends Thread{
                         
                         protected void initChannel(SocketChannel ch) throws Exception {
                         	ch.pipeline().addLast(new TunnelHttpResponseEncoder());
-                        	ch.pipeline().addLast(new HttpResponseEncoder());
-                        	ch.pipeline().addLast(new HttpObjectAggregator(1024*1024));
+//                        	ch.pipeline().addLast(new HttpResponseEncoder());
+                        	ch.pipeline().addLast(new HttpObjectAggregator(1024*1024*10));
                             ch.pipeline().addLast(new HttpServerHandler());  
                         };  
                         

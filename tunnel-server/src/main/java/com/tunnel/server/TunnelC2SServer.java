@@ -7,12 +7,13 @@ import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
+import io.netty.channel.ChannelPipeline;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.codec.DelimiterBasedFrameDecoder;
-import io.netty.handler.codec.http.HttpResponseEncoder;  
+import io.netty.handler.timeout.IdleStateHandler;  
   
 public class TunnelC2SServer extends Thread{  
   
@@ -33,10 +34,12 @@ public class TunnelC2SServer extends Thread{
                     .childHandler(new ChannelInitializer<SocketChannel>() {  
                         
                         protected void initChannel(SocketChannel ch) throws Exception {
-                        	ch.pipeline().addLast(new HttpResponseEncoder());
-                        	//返回内容，不超过10M
-                        	ch.pipeline().addLast(new DelimiterBasedFrameDecoder(1024*1024*10,Unpooled.copiedBuffer(Constant.ENT_FLAG.getBytes())));
-                        	ch.pipeline().addLast(new TunnelC2SServerHandler()); 
+                        	ChannelPipeline p = ch.pipeline();
+                        	//15秒钟心跳检测，客户端5秒发一次心跳，如果15秒没收到，断开连接
+                        	p.addLast(new IdleStateHandler(15, 0, 0));
+                            //返回内容，不超过10M
+                        	p.addLast(new DelimiterBasedFrameDecoder(1024*1024*10,Unpooled.copiedBuffer(Constant.ENT_FLAG_BYTES)));
+                        	p.addLast(new TunnelC2SServerHandler()); 
                         };  
                         
                     }).option(ChannelOption.SO_BACKLOG, 128)     
