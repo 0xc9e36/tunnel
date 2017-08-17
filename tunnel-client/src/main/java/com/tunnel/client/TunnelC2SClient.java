@@ -2,6 +2,9 @@ package com.tunnel.client;
   
 import java.util.concurrent.TimeUnit;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
@@ -16,6 +19,8 @@ import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.timeout.IdleStateHandler;  
   
 public class TunnelC2SClient{
+	private final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
+	
 	private EventLoopGroup group = new NioEventLoopGroup();  
 	private Bootstrap  bootstrap = new Bootstrap();;
     private Channel channel;
@@ -52,13 +57,13 @@ public class TunnelC2SClient{
                 if (futureListener.isSuccess()) {
                     channel = futureListener.channel();
                     connectFailedTimes = 0;//清空失败的连接次数
-                    System.out.println("C2S server Connect successfully!");
+                    LOGGER.info("C2S server Connect successfully!");
                 } else {
                 	connectFailedTimes++;
-                    System.out.println("Failed to connect C2S server x"+connectFailedTimes+", try connect after 10s");
+                    LOGGER.info("Failed to connect C2S server x"+connectFailedTimes+", try connect after 10s");
                     if(connectFailedTimes > 3){
                     	//超过三次，放弃连接，全部关闭
-                    	System.out.println("c2s shutdown");
+                    	LOGGER.info("c2s shutdown");
                     	group.shutdownGracefully();
                     }else{
                     	futureListener.channel().eventLoop().schedule(new Runnable() {

@@ -1,5 +1,8 @@
 package com.tunnel.server;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInitializer;
@@ -11,7 +14,8 @@ import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.codec.http.HttpObjectAggregator;  
   
 public class HttpServer extends Thread{  
-  
+	private final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
+	
     private int port;  
       
     public HttpServer(int port) {  
@@ -42,7 +46,7 @@ public class HttpServer extends Thread{
              // 绑定端口，开始接收进来的连接  
              ChannelFuture future = sbs.bind(port).sync();    
              
-             System.out.println("http server start listen at " + port );  
+             LOGGER.info("http server start listen at " + port );
              future.channel().closeFuture().sync();  
         } catch (Exception e) {  
             bossGroup.shutdownGracefully();  

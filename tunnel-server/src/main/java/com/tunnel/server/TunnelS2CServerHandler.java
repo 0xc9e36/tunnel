@@ -1,7 +1,11 @@
 package com.tunnel.server;
   
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.tunnel.common.Constant;
 import com.tunnel.common.StringUtil;
@@ -12,10 +16,13 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.util.Attribute;
 import io.netty.util.AttributeKey;  
   
-public class TunnelS2CServerHandler extends TunnelBaseHandler{  
-    public TunnelS2CServerHandler() {
+public class TunnelS2CServerHandler extends TunnelBaseHandler{
+	private final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
+	
+	public byte REGISTER_MSG = 5;
+	
+	public TunnelS2CServerHandler() {
 		super("S2C");
-		// TODO Auto-generated constructor stub
 	}
 
 	public static final AttributeKey<String> CLIEN_HOSTS_KEY = AttributeKey.valueOf("client.host"); 
@@ -29,7 +36,7 @@ public class TunnelS2CServerHandler extends TunnelBaseHandler{
     }
     
 	@Override
-	protected void handleData(ChannelHandlerContext ctx, ByteBuf buf) {
+	protected void handleData(ChannelHandlerContext ctx, ByteBuf buf, byte flag) {
 		byte[] data = new byte[buf.readableBytes()];
     	buf.getBytes(buf.readerIndex(), data,0,data.length);
         String content = new String(data);
@@ -46,32 +53,63 @@ public class TunnelS2CServerHandler extends TunnelBaseHandler{
 			for (String host : split2) {
 				host = host == null ? "" : host.trim();
 				Tunnel tunnel = new Tunnel(host, clientName, hostIndex++);
-				Attribute<String> attr = ctx.attr(CLIEN_HOSTS_KEY);
-				if(attr.get() == null){
-					attr.setIfAbsent(hostAry);
-				}
 				tunnel.setChannelHandlerContext(ctx);
 				boolean ok = TunnelManager.add(tunnel);
 				if (ok) {
+					//如果客户的域名端登记注册成功
+					//就把这个ctx里，记上对应的域名，因为在ctx异常或者关闭时候，tunnel是要被销毁的
+					//tunnel的销毁，就靠ctx携带的域名来找
+					Attribute<String> attr = ctx.attr(CLIEN_HOSTS_KEY);
+					if(attr.get() == null){
+						attr.setIfAbsent(hostAry);
+					}
 					successHostList.add(host);
 				} else {
 					failedHostList.add(host);
 				}
 			}
-			String success = "";
-			for (String host : successHostList) {
-				if (StringUtil.isNotEmpty(success)) {
-					success = success + ",";
-				}
-				success = success + host;
+			
+			
+			//返回信息
+			StringBuilder sb = new StringBuilder();
+			sb.append("\r\n\r\n[REGISTER RESULT START]\r\n");
+			//成功注册的域名
+			sb.append("register success:\r\n");
+			for (int i=0;i<successHostList.size();i++) {
+				sb.append(i+1)
+				.append("、")
+				.append(successHostList.get(i))
+				.append("\r\n");
 			}
-			String failed = "";
-			for (String host : failedHostList) {
-				if (StringUtil.isNotEmpty(failed)) {
-					failed = failed + ",";
-				}
-				failed = failed + host;
+			sb.append("\r\n");
+			//注册失败的域名
+			sb.append("register failed:\r\n");
+			for (int i=0;i<failedHostList.size();i++) {
+				sb.append(i+1)
+				.append("、")
+				.append(failedHostList.get(i))
+				.append("\r\n");
 			}
+			sb.append("\r\n");
+
+			//现在服务端的域名信息
+			sb.append("all host in server:\r\n");
+			Collection<Tunnel> tunnels = TunnelManager.getTunnels();
+			if(tunnels != null){
+				int index=1;
+				for(Tunnel tunnel:tunnels){
+					sb.append(index++)
+						.append("、")
+						.append(tunnel.getClientName())
+						.append("-")
+						.append(tunnel.getHost())
+						.append("\r\n");
+				}
+			}
+			sb.append("[REGISTER RESULT END!]\r\n\r\n");
+			
+			sendData(REGISTER_MSG, ctx, sb.toString().getBytes());
+			
 		}
 	}
 	
@@ -81,7 +119,7 @@ public class TunnelS2CServerHandler extends TunnelBaseHandler{
         super.handleReaderIdle(ctx);
         removeClient(ctx);
         ctx.close();
-        System.out.println("关闭S2C连接");
+        LOGGER.info("关闭S2C连接");
     }
     
     private void removeClient(ChannelHandlerContext ctx){

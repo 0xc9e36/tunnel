@@ -25,7 +25,7 @@ public class TunnelC2SClientHandler extends TunnelBaseHandler {
 	}
 
 	@Override
-	protected void handleData(ChannelHandlerContext ctx, ByteBuf buf) {
+	protected void handleData(ChannelHandlerContext ctx, ByteBuf buf, byte flag) {
 		//只发送，不接受
 	}
 

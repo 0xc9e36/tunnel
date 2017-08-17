@@ -2,6 +2,9 @@ package com.tunnel.client;
   
 import java.util.concurrent.TimeUnit;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.tunnel.common.Constant;
 
 import io.netty.bootstrap.Bootstrap;
@@ -24,6 +27,8 @@ import io.netty.handler.timeout.IdleStateHandler;
  * 全部启动完成后，开始接受请求
  */
 public class TunnelS2CClient{
+	private final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
+	
 	private EventLoopGroup group = new NioEventLoopGroup();  
 	private Bootstrap  bootstrap;
     private Channel channel;
@@ -66,13 +71,13 @@ public class TunnelS2CClient{
                 if (futureListener.isSuccess()) {
                     channel = futureListener.channel();
                     connectFailedTimes = 0;//清空失败的连接次数
-                    System.out.println("S2C server Connect successfully!");
+                    LOGGER.info("S2C server Connect successfully!");
                 } else {
                 	connectFailedTimes++;
-                    System.out.println("Failed to connect S2C server x"+connectFailedTimes+", try connect after 10s");
+                    LOGGER.info("Failed to connect S2C server x"+connectFailedTimes+", try connect after 10s");
                     if(connectFailedTimes > 3){
                     	//超过三次，放弃连接，全部关闭
-                    	System.out.println("s2c shutdown");
+                    	LOGGER.info("s2c shutdown");
                     	group.shutdownGracefully();
                     }else{
                     	futureListener.channel().eventLoop().schedule(new Runnable() {

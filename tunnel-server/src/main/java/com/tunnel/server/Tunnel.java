@@ -62,5 +62,4 @@ public class Tunnel {
 	public void setHostIndex(int hostIndex) {
 		this.hostIndex = hostIndex;
 	}
-
 }

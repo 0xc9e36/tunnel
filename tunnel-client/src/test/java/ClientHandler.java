@@ -12,7 +12,7 @@ public class ClientHandler extends TunnelBaseHandler {
 
 
 	@Override
-	protected void handleData(ChannelHandlerContext channelHandlerContext, ByteBuf buf) {
+	protected void handleData(ChannelHandlerContext channelHandlerContext, ByteBuf buf, byte flag) {
 		byte[] data = new byte[buf.readableBytes()];
     	buf.getBytes(buf.readerIndex(), data,0,data.length);
         String content = new String(data);

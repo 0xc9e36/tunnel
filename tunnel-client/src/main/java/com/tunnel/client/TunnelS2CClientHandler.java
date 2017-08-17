@@ -34,11 +34,27 @@ public class TunnelS2CClientHandler extends TunnelBaseHandler {
 			localHost = InetAddress.getLocalHost().getHostAddress();
 		} catch (Exception e) {}
 		String content = Config.NAME + "[" + localHost + "]" + Constant.SPLIT_FLAG + Config.HOST_ARY;
-		sendData(ctx, content.getBytes());
+		sendCommonData(ctx, content.getBytes());
 	}
 
 	@Override
-	protected void handleData(ChannelHandlerContext ctx, ByteBuf buf) {
+	protected void handleData(ChannelHandlerContext ctx, ByteBuf buf, byte flag) {
+		if(flag == COMMON_MSG){
+			doHttpRequest(ctx, buf);
+		}else{
+			doRegisterResult(ctx, buf);
+		}
+	}
+
+	public void doRegisterResult(ChannelHandlerContext ctx, ByteBuf buf){
+		if(LOGGER.isInfoEnabled()){
+			byte[] content = new byte[buf.readableBytes()];
+			buf.getBytes(buf.readerIndex(), content,0,content.length);
+			LOGGER.info(new String(content));
+		}
+	}
+	
+	public void doHttpRequest(ChannelHandlerContext ctx, ByteBuf buf){
 		//前17个字符是
 		//host_index(在Config.HOST_LIST里的下标) 占1位
 		//requestid 时间戳+三位随机数，代表http请求的编号 占16位
@@ -73,15 +89,15 @@ public class TunnelS2CClientHandler extends TunnelBaseHandler {
 						InputStream in = socket.getInputStream();
 						HttpData readData = HttpUtil.readData(in);
 						if(readData != null){
-							sendData(c2sCtx, requestidBytes, readData.getHeader(), readData.getData());
+							sendCommonData(c2sCtx, requestidBytes, readData.getHeader(), readData.getData());
 						} else {
 							byte[] response404 = HttpUtil.response404("tunnel-client");
-							sendData(c2sCtx, requestidBytes, response404);
+							sendCommonData(c2sCtx, requestidBytes, response404);
 						}
 						out.close();
 					} catch (Exception e) {
 						byte[] response500 = HttpUtil.response500(e.getMessage(),"tunnel-client");
-						sendData(c2sCtx, requestidBytes, response500);
+						sendCommonData(c2sCtx, requestidBytes, response500);
 					} finally {
 						try {
 							socket.close();
@@ -89,7 +105,7 @@ public class TunnelS2CClientHandler extends TunnelBaseHandler {
 					}
 				}else{
 					byte[] response404 = HttpUtil.response404("tunnel-client");
-					sendData(c2sCtx, requestidBytes, response404);
+					sendCommonData(c2sCtx, requestidBytes, response404);
 				}
 			}
 		}

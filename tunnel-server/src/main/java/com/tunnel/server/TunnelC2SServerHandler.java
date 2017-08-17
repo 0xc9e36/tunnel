@@ -1,5 +1,8 @@
 package com.tunnel.server;
   
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.tunnel.common.TunnelBaseHandler;
 
 import io.netty.buffer.ByteBuf;
@@ -7,7 +10,8 @@ import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;  
   
 public class TunnelC2SServerHandler extends TunnelBaseHandler{  
-    
+	private final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
+	
     public TunnelC2SServerHandler() {
 		super("C2S");
 	}
@@ -19,7 +23,7 @@ public class TunnelC2SServerHandler extends TunnelBaseHandler{
     }
 
 	@Override
-	protected void handleData(ChannelHandlerContext ctx, ByteBuf buf) {
+	protected void handleData(ChannelHandlerContext ctx, ByteBuf buf, byte flag) {
 		//前16个字符是
 		//requestid 时间戳+三位随机数，代表http请求的编号 占16位
 		if(buf.readableBytes() > 16){
@@ -43,7 +47,7 @@ public class TunnelC2SServerHandler extends TunnelBaseHandler{
     protected void handleReaderIdle(ChannelHandlerContext ctx) {
         super.handleReaderIdle(ctx);
         ctx.close();
-        System.out.println("关闭C2S连接");
+        LOGGER.info("关闭C2S连接");
     }
 	
 }  

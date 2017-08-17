@@ -1,5 +1,8 @@
 package com.tunnel.server;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.tunnel.common.Constant;
 
 import io.netty.bootstrap.ServerBootstrap;
@@ -16,8 +19,8 @@ import io.netty.handler.codec.DelimiterBasedFrameDecoder;
 import io.netty.handler.timeout.IdleStateHandler;  
   
 public class TunnelC2SServer extends Thread{  
-  
-      
+	private final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
+	
     public TunnelC2SServer() {  
         this.setName("TunnelC2SServer thread");
     }  
@@ -47,7 +50,7 @@ public class TunnelC2SServer extends Thread{
              // 绑定端口，开始接收进来的连接  
              ChannelFuture future = sbs.bind(Config.REPLY_PORT).sync();    
              
-             System.out.println("tunnel c2s server start listen at " + Config.REPLY_PORT );  
+             LOGGER.info("tunnel c2s server start listen at " + Config.REPLY_PORT);
              future.channel().closeFuture().sync();  
         } catch (Exception e) {  
             bossGroup.shutdownGracefully();  
