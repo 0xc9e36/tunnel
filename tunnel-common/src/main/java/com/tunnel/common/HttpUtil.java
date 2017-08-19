@@ -12,7 +12,7 @@ public class HttpUtil {
 	 httpData = null; try { //TODO:1024字节够不够完全描述一次http请求，这里还要具体分析 
 	 byte[] data = new byte[1024]; int len = 0; while ((len = in.read(data)) >= 0) {
 	 baos.write(data,0,len); httpData = analyzeHttpData(baos.toByteArray());
-	 if(httpData.isOk()) break; } if(httpData != null && httpData.getData() !=
+	 if(httpData != null && httpData.isOk()) break; } if(httpData != null && httpData.getData() !=
 	 null) httpData.setOk(true); } finally { try { baos.close(); }
 	 catch(Exception ex) {} } return httpData; }
 	 
@@ -50,13 +50,13 @@ public class HttpUtil {
 			byte[] header = httpData.getHeader();
 
 			String content = new String(header);
-			if (content.indexOf("Transfer-Encoding:") > 0) {
+			if (getFieldIndexInHeader(content,"Transfer-Encoding:") > 0) {
 				byte[] bodyEndFlag = "\r\n0\r\n\r\n".getBytes();
 				for (int i = header.length; i < data.length; i++) {
 					if (data[i] == bodyEndFlag[0]) {
 						// 从这开始比对
 						int j = 0;
-						for (; j < bodyEndFlag.length; i++, j++) {
+						for (; j < bodyEndFlag.length && i < data.length; i++, j++) {
 							if (data[i] != bodyEndFlag[j]) {
 								break;
 							}
@@ -73,7 +73,7 @@ public class HttpUtil {
 						}
 					}
 				}
-			} else if (content.indexOf("Content-Length:") > 0) {
+			} else if (getFieldIndexInHeader(content,"Content-Length:") > 0) {
 				int index = content.indexOf("Content-Length:");
 				if (index > 0) {
 					int end = content.indexOf("\r\n", index);
@@ -100,6 +100,12 @@ public class HttpUtil {
 		return httpData;
 	}
 
+	private static int getFieldIndexInHeader(String header,String field){
+		header = header.toUpperCase();
+		field = field.toUpperCase();
+		return header.indexOf(field);
+	}
+	
 	public static String getHost(byte[] header) {
 		String content = new String(header);
 		int index = content.indexOf("Host:");
