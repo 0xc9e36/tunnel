@@ -20,8 +20,15 @@ public class Config {
 	public static String NAME;
 	public static String HOST_ARY;
 	public static List<IpAndPort> HOST_LIST = new ArrayList<>();
-	static {
-		Properties props = PropsUtil.loadProps("sys.properties");
+	
+	
+	public static void init(String configFileUrl){
+		
+		Properties props = PropsUtil.loadProps(configFileUrl);
+		if(props == null){
+			LOGGER.error("配置文件不存在："+configFileUrl);
+			System.exit(0);
+		}
 		SERVER_IP = PropsUtil.getString(props, "server_ip");
 		if (StringUtil.isEmpty(SERVER_IP)) {
 			LOGGER.error("服务器[IP]配置错误：server_ip=" + SERVER_IP);

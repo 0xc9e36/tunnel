@@ -1,5 +1,7 @@
 package com.tunnel.common;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.InputStream;
 import java.util.Properties;
 
@@ -21,13 +23,17 @@ public final class PropsUtil {
      * 加载属性文件
      */
     public static Properties loadProps(String fileName) {
-        Properties props = new Properties();
+        Properties props = null;
         InputStream is = null;
         try {
-            is = Thread.currentThread().getContextClassLoader().getResourceAsStream(fileName);
-            if (is != null) {
-                props.load(is);
-            }
+        	File configFile = new File(fileName);
+        	if(configFile.exists()){
+        		is = new FileInputStream(configFile);
+        	}
+        	if (is != null) {
+        		props = new Properties();
+        		props.load(is);
+        	}
         } catch (Exception e) {
             LOGGER.error("load properties file [" + fileName + "] failure", e);
         } finally {

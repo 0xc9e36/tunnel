@@ -122,6 +122,12 @@ public class TunnelS2CServerHandler extends TunnelBaseHandler{
         LOGGER.info("关闭S2C连接");
     }
     
+    @Override
+    public void channelInactive(ChannelHandlerContext ctx) throws Exception {
+    	super.channelInactive(ctx);
+    	removeClient(ctx);
+    }
+    
     private void removeClient(ChannelHandlerContext ctx){
     	Attribute<String> attr = ctx.attr(CLIEN_HOSTS_KEY);
         if(attr.get() != null){

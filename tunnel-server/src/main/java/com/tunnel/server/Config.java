@@ -13,8 +13,13 @@ public class Config {
     public static int HTTP_SERVER_PORT;
     public static int REGISTER_PORT;
 	public static int REPLY_PORT;
-	static{
-		Properties props = PropsUtil.loadProps("sys.properties");
+
+	public static void init(String configFileUrl){
+		Properties props = PropsUtil.loadProps(configFileUrl);
+		if(props == null){
+			LOGGER.error("配置文件不存在："+configFileUrl);
+			System.exit(0);
+		}
 		HTTP_SERVER_PORT = PropsUtil.getInt(props, "http_server_port");
 		if(HTTP_SERVER_PORT <= 0){
 			LOGGER.error("http服务[端口]配置错误：http_server_port="+HTTP_SERVER_PORT);
@@ -33,4 +38,5 @@ public class Config {
 			System.exit(0);
 		}
 	}
+	
 }
