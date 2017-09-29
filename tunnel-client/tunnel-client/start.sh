@@ -4,4 +4,4 @@ done
  
 export CLASSPATH=:$CLASSPATH
  
-java -classpath .:${CLASSPATH} com.tunnel.server.SRun
+java -classpath .:${CLASSPATH} com.tunnel.client.CRun $1
