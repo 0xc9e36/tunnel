@@ -1,4 +1,4 @@
-for i in ./bin/*.jar;
+for i in ./bin/*;
 do CLASSPATH=$i:"$CLASSPATH";
 done
  
